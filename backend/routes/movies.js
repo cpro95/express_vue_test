@@ -4,7 +4,7 @@ const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
 
 let db;
-let sql = `select * from movie where c05 > 8.00`;
+let sql = `select * from movie where c05 > 8.00 and c07 > 2014`;
 
 // open the database connection
 function db_open() {
@@ -29,6 +29,13 @@ function db_close() {
 
 router.get('/', function(req, res, next){
 
+	if(Object.keys(req.query).length === 0) {
+		// no query	
+	} else {
+		// parse search query to db sql
+		sql = `select * from movie where c00 like '%${req.query.name}%'`; 
+	}
+
 	db_open();
 
 	db.all(sql, [], (err, movies) => {
@@ -49,25 +56,29 @@ router.get('/', function(req, res, next){
 					row.c20 = result.fanart.thumb[0].$.preview;
 				});
 			});
-		res.send(movies);
+		if(Object.keys(movies).length === 0 ) {
+			res.send(`No data found`);
+		} else {
+			res.send(movies);
+		}
 		});
 
 	db_close();
 });
 
 router.get('/:id', function(req, res, next){
+
+	// parse sql query or sql params
+	let id = parseInt(req.params.id, 10);
+	sql = `select * from movie where idMovie = ${id}`;
+
 	// open the database
 	db_open();
 
-	db.all(sql, [], (err, movies) => {
+	db.all(sql, [], (err, movie) => {
 		if(err) {
 			throw err;
 		}
-
-		let id = parseInt(req.params.id, 10);
-		let movie = movies.filter(function(movie){
-			return movie.idMovie === id;
-		});
 
 		// movie.c08,c20 is xml type
 		// movie is array
@@ -84,11 +95,16 @@ router.get('/:id', function(req, res, next){
 				});
 			});
 
-		res.send(movie);	
-	})
+		if(Object.keys(movie).length === 0 ) {
+			res.send(`No data found : id = ${id}`);
+		} else {
+			res.send(movie);
+		}
+	});
 
 	//close the database
 	db_close();
 });
+
 
 module.exports = router;

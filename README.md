@@ -1,2 +1,6 @@
 # express_vue_test
-express vue test
+Test of Express backend server and Vue.js frontend page
+
+## contact
+cpro95(cpro95@gmail.com)
+
