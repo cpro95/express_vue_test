@@ -2,7 +2,6 @@ const express = require('express');
 const path = require('path');
 const favicon = require('serve-favicon');
 const logger = require('morgan');
-const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const uuid = require('uuid/v4');
 const session = require('express-session');
@@ -58,19 +57,19 @@ passport.deserializeUser((id, done) => {
 const index = require('./routes/index');
 const movies = require('./routes/movies');
 const login = require('./routes/login');
+const users = require('./routes/users');
 
 const app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // add & configure middleware
@@ -92,16 +91,27 @@ app.use(passport.session());
 
 app.use('/', index);
 app.use('/login', login);
+app.use('/users', users);
 app.use('/api/movies', movies);
 
 app.get('/authrequired', (req, res) => {
 	console.log('인사이드 GET /authrequired callback')
 	console.log(`User authenticated? ${req.isAuthenticated()}`)
 	if(req.isAuthenticated()) {
-		res.send('you hit the authentication endpoint\n');
+		console.log('you hit the authentication endpoint\n');
+		res.redirect('/users');
 	} else {
-		res.redirect('/');
+		res.redirect('/login');
 	}
+});
+
+app.get('/logout', (req, res) => {
+	req.logout();
+	//res.redirect('/login');
+	req.session.destroy((err) => {
+		res.clearCookie('connect.sid');
+		res.redirect('/login');
+	});
 });
 
 // catch 404 and forward to error handler

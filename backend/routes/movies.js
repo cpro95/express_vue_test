@@ -3,8 +3,8 @@ const router = express.Router();
 //const movies = require('../movies.json');
 const sqlite3 = require('sqlite3').verbose();
 
-let db;
-let sql = `select * from movie where c05 > 8.00 and c07 > 2014`;
+var db;
+var sql = `select * from movie where c05 > 8.00 and c07 > 2014`;
 
 // open the database connection
 function db_open() {
@@ -69,7 +69,7 @@ router.get('/', function(req, res, next){
 router.get('/:id', function(req, res, next){
 
 	// parse sql query or sql params
-	let id = parseInt(req.params.id, 10);
+	var id = parseInt(req.params.id, 10);
 	sql = `select * from movie where idMovie = ${id}`;
 
 	// open the database

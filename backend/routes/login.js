@@ -5,7 +5,11 @@ const passport = require('passport');
 router.get('/', function(req, res, next){
 	console.log('인사이드 GET /login 콜백 안에서')
 	console.log(req.sessionID);
-	res.send('You got the login page\n');
+	if(req.isAuthenticated()) {
+		res.send(`GET Method: You're already logged as id : ${req.user.id}\n`);
+	} else {
+		res.render('login', {title: 'hey', message: 'Hello there!'});
+	}
 });
 
 router.post('/', function(req, res, next){
