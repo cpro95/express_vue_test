@@ -3,7 +3,7 @@ const router = express.Router();
 //const movies = require('../movies.json');
 const sqlite3 = require('sqlite3').verbose();
 
-// check whether authenticated?
+// middleware - check whether authenticated?
 function checkAuthentication(req, res, next) {
 	if(req.isAuthenticated()) {
 		next();
@@ -43,7 +43,25 @@ router.get('/', checkAuthentication, function(req, res, next){
 		// no query	
 	} else {
 		// parse search query to db sql
-		sql = `select * from movie where c00 like '%${req.query.name}%'`; 
+		const query = Object.keys(req.query);
+		// sql = `select * from movie where c00 like '%${req.query.name}%'`; 
+
+		sql = `select * from movie where`;
+		query.map(function(item){
+			if(item === 'name') {
+				if(sql.slice(-5) != 'where') sql += ` and `;
+				sql += ` c00 like '%${req.query[item]}%'`; 
+			}
+			if(item === 'year') {
+				if(sql.slice(-5) != 'where') sql += ` and `;
+				sql += ` c07 >= ${req.query[item]}`; 
+			}
+			if(item === 'rating') {
+				if(sql.slice(-5) != 'where') sql += ` and `;
+				sql += ` c05 >= ${req.query[item]}`;
+			}
+		});
+		console.log(sql);
 	}
 
 	db_open();
@@ -56,14 +74,17 @@ router.get('/', checkAuthentication, function(req, res, next){
 		// movies is array
 		movies.forEach(function(row){
 				const parser = new require('xml2js').Parser();
+
+				if(row.c08 != '')
 				parser.parseString(row.c08, function(err, result){
 					// replacing preview link to movies.c08
-					row.c08 = result.thumb.$.preview;
+						row.c08 = result.thumb.$.preview;
 				});
 
+				if(row.c20 != '')
 				parser.parseString(row.c20, function(err, result){
 					// replacing preview link to movies.c20
-					row.c20 = result.fanart.thumb[0].$.preview;
+						row.c20 = result.fanart.thumb[0].$.preview;
 				});
 			});
 		if(Object.keys(movies).length === 0 ) {
@@ -87,18 +108,20 @@ router.get('/:id',checkAuthentication, function(req, res, next){
 
 	db.all(sql, [], (err, movie) => {
 		if(err) {
+			console.log(err);
 			throw err;
 		}
-
+		
 		// movie.c08,c20 is xml type
 		// movie is array
 		movie.forEach(function(row){
 				const parser = new require('xml2js').Parser();
+			if(row.c08 != '')
 				parser.parseString(row.c08, function(err, result){
 					// replacing preview link to movies.c08
 					row.c08 = result.thumb.$.preview;
 				});
-
+			if(row.c20 != '')
 				parser.parseString(row.c20, function(err, result){
 					// replacing preview link to movies.c20
 					row.c20 = result.fanart.thumb[0].$.preview;
