@@ -14,12 +14,13 @@ router.get('/', function(req, res, next){
 
 router.post('/', function(req, res, next){
 	console.log('인사이드 POST /login 콜백 안에서');
-	passport.authenticate('local', (err, user, info) => {
+
+	passport.authenticate('local', (err, user) => {
 		console.log('Inside passport.authenticate() callback');
 		console.log(`req.session.passport: ${JSON.stringify(req.session.passport)}`);
 		console.log(`req.user: ${JSON.stringify(req.user)}`);
 
-		if(info) { return res.send(info.message); }
+		//if(info) { return res.send(info.message); }
 		if(err) { return next(err); }
 		if(!user) { return res.redirect('/login'); }
 
@@ -29,9 +30,12 @@ router.post('/', function(req, res, next){
 			console.log(`req.user: ${JSON.stringify(req.user)}`);
 
 			if(err) { return next(err); }
-			return res.redirect('/authrequired');
+
+			// when login authenticated
+			return res.redirect('/users');
 		})
 	})(req, res, next);
+
 });
 
 

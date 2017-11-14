@@ -11,6 +11,18 @@ const LocalStrategy = require('passport-local').Strategy;
 const axios = require('axios');
 const bcrypt = require('bcrypt-nodejs');
 
+const userData = [
+		{
+			"id":"cpro95",
+			"email": "cpro95@daum.net",
+			"password": "$2a$10$Sle/YSEDWQlM9XIXRniY4uB7OjkcyQuqow0PTMDrwlt3hy6tB0NhK"
+		},
+		{
+			"id": "user2",
+			"email": "user2@example.com",
+			"password": "$2a$10$K.uStupYG.VT7V459ZnpyuWz7IfNzM2daoHf4CzbfNxSbb3Kuh5zG"
+		}
+];
 
 passport.use(new LocalStrategy(
 	{
@@ -25,6 +37,19 @@ passport.use(new LocalStrategy(
 		// to find the user based on their username or email address
 		// for now, we'll just pretend we found that it was users[0]
 		console.log(email);
+		const user = userData[0];
+
+		if (!user) {
+			return done(null, false, { message: 'Invalid credentials.\n' })
+		}
+
+		if(!bcrypt.compareSync(password, user.password)) {
+			return done(null, false, { message: 'Invalid credentials.\n' })
+		}
+
+		return done(null, user);
+
+		/*
 		axios.get(`http://localhost:5000/users?email=${email}`)
 			.then(res => {
 				const user = res.data[0]
@@ -37,6 +62,8 @@ passport.use(new LocalStrategy(
 				return done(null, user);
 			})
 			.catch(error => done(error));
+			*/
+
 		}
 ));
 
@@ -49,9 +76,15 @@ passport.deserializeUser((id, done) => {
 		console.log('디시리얼라이즈 콜백 안입니다.');
 		console.log(`세션 파일 스토어에 있는 유저 아이디 : ${id}`);
 
+		const user = userData[0].id === id ? userData[0] : false;
+		done(null, user);
+
+	/*
 		axios.get(`http://localhost:5000/users/${id}`)
 		.then(res => done(null, res.data))
 		.catch(error => done(error, false));
+	*/
+
 });
 
 const index = require('./routes/index');
@@ -94,6 +127,7 @@ app.use('/login', login);
 app.use('/users', users);
 app.use('/api/movies', movies);
 
+/*
 app.get('/authrequired', (req, res) => {
 	console.log('인사이드 GET /authrequired callback')
 	console.log(`User authenticated? ${req.isAuthenticated()}`)
@@ -104,10 +138,10 @@ app.get('/authrequired', (req, res) => {
 		res.redirect('/login');
 	}
 });
+*/
 
 app.get('/logout', (req, res) => {
 	req.logout();
-	//res.redirect('/login');
 	req.session.destroy((err) => {
 		res.clearCookie('connect.sid');
 		res.redirect('/login');

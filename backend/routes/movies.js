@@ -3,6 +3,16 @@ const router = express.Router();
 //const movies = require('../movies.json');
 const sqlite3 = require('sqlite3').verbose();
 
+// check whether authenticated?
+function checkAuthentication(req, res, next) {
+	if(req.isAuthenticated()) {
+		next();
+	} else {
+		console.log('Not log in');
+		res.redirect('/login');
+	}
+}
+
 var db;
 var sql = `select * from movie where c05 > 8.00 and c07 > 2014`;
 
@@ -27,7 +37,7 @@ function db_close() {
 	});
 }
 
-router.get('/', function(req, res, next){
+router.get('/', checkAuthentication, function(req, res, next){
 
 	if(Object.keys(req.query).length === 0) {
 		// no query	
@@ -66,7 +76,7 @@ router.get('/', function(req, res, next){
 	db_close();
 });
 
-router.get('/:id', function(req, res, next){
+router.get('/:id',checkAuthentication, function(req, res, next){
 
 	// parse sql query or sql params
 	var id = parseInt(req.params.id, 10);
