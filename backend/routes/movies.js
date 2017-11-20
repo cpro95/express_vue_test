@@ -91,6 +91,7 @@ router.get('/', checkAuthentication, function(req, res, next){
 			res.send(`No data found`);
 		} else {
 			res.send(movies);
+			//res.json(movies);
 		}
 		});
 

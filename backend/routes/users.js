@@ -11,6 +11,7 @@ router.get('/', function(req, res, next) {
 	if(req.isAuthenticated()) {
 		console.dir(req.user);
 		res.send(req.user); // Don't need stringify because firefox can parse it
+		//res.json(req.user);
 	} else {
 		console.log('you are not logged\n');
 		res.redirect('/login');

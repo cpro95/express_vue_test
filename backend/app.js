@@ -87,11 +87,6 @@ passport.deserializeUser((id, done) => {
 
 });
 
-const index = require('./routes/index');
-const movies = require('./routes/movies');
-const login = require('./routes/login');
-const users = require('./routes/users');
-
 const app = express();
 
 // view engine setup
@@ -102,7 +97,7 @@ app.set('view engine', 'pug');
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // add & configure middleware
@@ -121,24 +116,15 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+const index = require('./routes/index');
+const login = require('./routes/login');
+const users = require('./routes/users');
+const movies = require('./routes/movies');
 
 app.use('/', index);
 app.use('/login', login);
 app.use('/users', users);
 app.use('/api/movies', movies);
-
-/*
-app.get('/authrequired', (req, res) => {
-	console.log('인사이드 GET /authrequired callback')
-	console.log(`User authenticated? ${req.isAuthenticated()}`)
-	if(req.isAuthenticated()) {
-		console.log('you hit the authentication endpoint\n');
-		res.redirect('/users');
-	} else {
-		res.redirect('/login');
-	}
-});
-*/
 
 app.get('/logout', (req, res) => {
 	req.logout();
